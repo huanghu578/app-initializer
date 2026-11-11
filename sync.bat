@@ -14,7 +14,24 @@ if not exist ".git" (
     exit /b 1
 )
 
-:: 2. Generate default commit timestamp message
+:: 2. Detect current branch (compatible with main / master / others)
+for /f "delims=" %%b in ('git rev-parse --abbrev-ref HEAD 2^>nul') do set "branch=%%b"
+if "!branch!"=="" (
+    echo Error: Unable to detect current Git branch.
+    echo Please make sure you have at least one commit in this repository.
+    pause
+    exit /b 1
+)
+if /i "!branch!"=="HEAD" (
+    echo Error: Detached HEAD state detected.
+    echo Please checkout a branch first, e.g. git checkout main
+    pause
+    exit /b 1
+)
+echo Current branch: !branch!
+echo.
+
+:: 3. Generate default commit timestamp message
 for /f "tokens=1-3 delims=/- " %%a in ('date /t') do (
     set date_str=%%a-%%b-%%c
 )
@@ -87,8 +104,8 @@ if %commit_err% neq 0 (
 )
 
 :: Git pull rebase
-echo Pulling latest from remote...
-git pull --rebase origin master
+echo Pulling latest from remote (branch: !branch!)...
+git pull --rebase origin !branch!
 if %errorlevel% neq 0 (
     echo ========================================
     echo Conflict detected during pull!
@@ -100,8 +117,8 @@ if %errorlevel% neq 0 (
 )
 
 :: Git push
-echo Pushing to remote...
-git push origin master
+echo Pushing to remote (branch: !branch!)...
+git push origin !branch!
 if %errorlevel% neq 0 (
     echo git push failed, please check network or permissions.
     pause
@@ -110,6 +127,7 @@ if %errorlevel% neq 0 (
 
 echo ========================================
 echo Sync completed!
+echo Branch: !branch!
 echo Commit message: !commit_msg!
 echo ========================================
 pause
