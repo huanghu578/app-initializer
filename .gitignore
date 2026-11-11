@@ -1,0 +1,73 @@
+# 编译输出
+target/
+build/
+out/
+obj/
+Debug/
+Release/
+publish/
+dist/
+
+# 依赖
+node_modules/
+packages/
+vendor/
+libs/
+*.jar
+*.war
+*.ear
+
+# 编译产物
+*.class
+*.dll
+*.exe
+*.so
+*.dylib
+*.o
+*.obj
+*.pyc
+*.pyo
+*.pyd
+
+# 日志和临时文件
+*.log
+*.tmp
+*.temp
+*.cache
+*.pid
+*.seed
+
+# IDE和编辑器
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+*.suo
+*.user
+*.sln.docstates
+
+# 环境配置
+.env
+.env.local
+.env.*.local
+*.local
+
+# 测试覆盖率
+coverage/
+.nyc_output/
+.pytest_cache/
+.tox/
+htmlcov/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# 特定文件
+cover/bzxz.pdf

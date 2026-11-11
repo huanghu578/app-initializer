@@ -1,0 +1,12 @@
+[package]
+name = "app-initializer"
+version = "0.1.0"
+edition = "2021"
+description = "A robust, atomic initializer for desktop apps (especially Windows MSIX) to manage AppData resources."
+license = "MIT"
+
+[dependencies]
+directories = "5.0"
+thiserror = "1.0"
+semver = "1.0"
+walkdir = "2.4"
