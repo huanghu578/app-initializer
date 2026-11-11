@@ -1,13 +1,13 @@
 [package]
 name = "app-initializer"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "A robust, atomic initializer for desktop apps (especially Windows MSIX) to manage AppData resources."
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 rust-version = "1.70"
-repository = "https://github.com/huanghu578/app-initializer"
-homepage = "https://github.com/huanghu578/app-initializer"
+repository = "https://github.com/your_username/app-initializer"
+homepage = "https://github.com/your_username/app-initializer"
 documentation = "https://docs.rs/app-initializer"
 keywords = ["initializer", "msix", "appdata", "desktop", "atomic"]
 categories = ["filesystem", "development-tools"]
@@ -16,6 +16,4 @@ exclude = [".github", "examples/screenshots", "CHANGELOG.md", "sync.bat"]
 [dependencies]
 directories = "5.0"
 thiserror = "1.0"
-semver = "1.0"
 walkdir = "2.4"
-

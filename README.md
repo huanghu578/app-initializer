@@ -10,9 +10,11 @@
 
 ## ✨ 核心特性
 
-- **原子提交机制 (Atomic Commits)**：采用“影子目录”复制，完美成功后才瞬间替换目标目录。**哪怕复制到 99% 断电，目标目录也不会出现半截文件。**
+- **严格校验 (Strict Validation)**：启动初始化前，会校验 `assets` 和 `configs` 列表中的文件是否存在。打包漏了文件会立刻抛出错误，防止生成残缺的运行环境。
+- **原子提交 (Atomic Commits)**：采用“影子目录”复制，完美成功后才瞬间替换目标目录。哪怕复制到 99% 断电，目标目录也不会出现半截文件。
 - **纯逻辑，零 UI 依赖**：只接收进度回调闭包，命令行、FLTK、Tauri 等框架均可轻松接入。
-- **自动增量更新**：对比语义化版本号，升级时只覆盖 `assets`（静态资源），绝不覆盖 `configs`（用户配置）。
+- **版本号兼容**：支持 3 段式 (`1.0.0`) 和 4 段式 (`1.0.0.1`) 版本号。内部会自动补齐至 4 段进行按位比较，确保 `1.0.0.10` 必定大于 `1.0.0.2`，防止整数溢出或进位错误。
+- **自动增量更新**：对比语义化版本号，升级时只覆盖 `assets`，绝不覆盖 `configs`。
 - **安全回滚**：升级覆盖时，若旧文件被系统占用，会自动放弃替换并恢复原状，保护用户数据。
 - **跨平台**：自动适配 Windows（`%APPDATA%`）、macOS 和 Linux。
 
@@ -20,7 +22,7 @@
 
 ```toml
 [dependencies]
-app-initializer = "0.1.0"
+app-initializer = "0.1.1"
 ```
 🚀 快速开始
 ```rust
@@ -29,7 +31,7 @@ use app_initializer::{AppInitializer, AppInitConfig};
 let config = AppInitConfig {
     app_name: "MyApp",
     org_name: "MyCompany",
-    current_version: env!("CARGO_PKG_VERSION"), // 自动读取 Cargo.toml 版本号
+    current_version: env!("CARGO_PKG_VERSION"), 
     assets: &["index.html", "assets/"],
     configs: &["config.toml"],
 };
@@ -40,12 +42,8 @@ if initializer.is_init_needed(&config) {
     // 传入一个闭包接收进度数据，自己决定如何绘制 UI
     initializer.initialize(&config, |progress| {
         println!("进度: {:.2}% - {}", progress.percentage(), progress.current_file);
-    }).unwrap();
+    }).expect("初始化失败");
 }
-
-// 获取目标路径用于加载
-let app_data_path = initializer.data_dir();
-println!("目标路径: {:?}", app_data_path);
 ```
 🖥 框架接入示例
 命令行 (CLI)：使用 print!("\r...") 覆盖打印，见 examples/cli_demo.rs。
