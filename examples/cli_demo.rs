@@ -1,4 +1,4 @@
-use app_initializer::{AppInitializer, AppInitConfig};
+use app_initializer::{AppInitConfig, AppInitializer};
 use std::fs::File;
 use std::io::{self, Write};
 use std::thread;
@@ -11,15 +11,15 @@ fn main() {
         app_name: "MyDemoApp",
         org_name: "DemoCorp",
         current_version: "1.0.0", // 修改这里可以测试升级逻辑
-        assets: &["test_assets", "bigfile.zip"], 
-        configs: &["test_config.toml"], 
+        assets: &["test_assets", "bigfile.zip"],
+        configs: &["test_config.toml"],
     };
 
     let initializer = AppInitializer::new(config.app_name, config.org_name).expect("无法解析目录");
 
     if initializer.is_init_needed(&config) {
         println!("检测到首次运行或版本升级，准备初始化...");
-        
+
         // 生成模拟文件（如果已存在则跳过）
         //create_dummy_files();
 
@@ -58,7 +58,7 @@ fn main() {
 fn create_dummy_files() {
     // 1. 生成配置文件
     let _ = std::fs::write("test_config.toml", "[settings]\ntheme = 'dark'\n");
-    
+
     // 2. 生成资源文件夹
     let _ = std::fs::create_dir_all("test_assets");
     for i in 0..200 {

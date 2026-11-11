@@ -1,7 +1,7 @@
 //! # App Initializer
 //!
 //! 专为桌面应用（尤其是 Windows MSIX / Store 应用）设计的初始化与资源部署库。
-//! 
+//!
 //! ## 核心机制
 //! 采用“影子目录 (Staging) + 原子重命名 (Atomic Rename)”机制。
 //! 保证无论程序在何时崩溃或断电，目标目录（AppData）绝对不会出现半截文件。
@@ -23,16 +23,16 @@ use walkdir::WalkDir;
 pub enum InitError {
     #[error("无法确定系统数据目录，可能是当前操作系统不支持或环境变量缺失")]
     DirNotFound,
-    
+
     #[error("版本号解析错误: {0}")]
     VersionParseError(#[from] semver::Error),
-    
+
     #[error("文件或目录操作失败: {0}")]
     IoError(#[from] io::Error),
-    
+
     #[error("未找到当前可执行文件所在的目录")]
     ExeDirNotFound,
-    
+
     #[error("提交流程失败，已自动回滚至旧版本")]
     CommitFailed(#[source] io::Error),
 
@@ -44,17 +44,17 @@ pub enum InitError {
 pub struct AppInitConfig<'a> {
     /// 应用名称 (用于生成 AppData 文件夹名称，如 `%APPDATA%/Org/AppName`)
     pub app_name: &'a str,
-    
+
     /// 组织/作者名称 (用于区分同名应用)
     pub org_name: &'a str,
-    
+
     /// 当前的软件版本号 (例如 "1.0.0")，用于对比是否需要增量更新
     pub current_version: &'a str,
-    
+
     /// **程序资源列表** (如 `["index.html", "assets/"]`)。
     /// 每次版本升级都会用安装目录中的最新文件覆盖 AppData 中的旧文件。
     pub assets: &'a [&'a str],
-    
+
     /// **用户配置列表** (如 `["config.toml"]`)。
     /// 仅在**首次运行**时复制，后续升级绝不覆盖，保护用户数据。
     pub configs: &'a [&'a str],
@@ -88,7 +88,8 @@ pub struct AppInitializer {
 impl AppInitializer {
     /// 创建实例并确定跨平台的 AppData 路径
     pub fn new(app_name: &str, org_name: &str) -> Result<Self, InitError> {
-        let proj_dirs = ProjectDirs::from("com", org_name, app_name).ok_or(InitError::DirNotFound)?;
+        let proj_dirs =
+            ProjectDirs::from("com", org_name, app_name).ok_or(InitError::DirNotFound)?;
         Ok(Self {
             target_dir: proj_dirs.data_dir().to_path_buf(),
         })
@@ -104,7 +105,7 @@ impl AppInitializer {
         if !self.target_dir.exists() {
             return true;
         }
-        
+
         let target_version_file = self.target_dir.join(".version");
         if let Ok(stored_ver_str) = fs::read_to_string(&target_version_file) {
             if let Ok(stored_ver) = Version::parse(stored_ver_str.trim()) {
@@ -135,8 +136,11 @@ impl AppInitializer {
         fs::create_dir_all(&tmp_dir)?;
 
         let exe_path = std::env::current_exe()?;
-        let mut source_dir = exe_path.parent().ok_or(InitError::ExeDirNotFound)?.to_path_buf();
-        
+        let mut source_dir = exe_path
+            .parent()
+            .ok_or(InitError::ExeDirNotFound)?
+            .to_path_buf();
+
         // 兼容 cargo run 开发环境
         if !config.assets.is_empty() && !source_dir.join(config.assets[0]).exists() {
             if let Ok(cwd) = std::env::current_dir() {
@@ -170,11 +174,23 @@ impl AppInitializer {
             fs::copy(&src, &dest)?;
             current += 1;
 
-            let current_percent = if total == 0 { 100 } else { (current * 100) / total };
+            let current_percent = if total == 0 {
+                100
+            } else {
+                (current * 100) / total
+            };
             if current_percent > last_report_percent + 4 || current == total || total <= 20 {
                 last_report_percent = current_percent;
-                let file_name = src.file_name().unwrap_or_default().to_string_lossy().to_string();
-                progress_cb(Progress { current, total, current_file: file_name });
+                let file_name = src
+                    .file_name()
+                    .unwrap_or_default()
+                    .to_string_lossy()
+                    .to_string();
+                progress_cb(Progress {
+                    current,
+                    total,
+                    current_file: file_name,
+                });
             }
         }
 
@@ -206,11 +222,11 @@ impl AppInitializer {
     /// 带严格校验的任务收集器
     /// 如果配置项在源目录中不存在，直接返回 ResourceNotFound 错误
     fn collect_tasks_strict(
-        &self, 
-        source_dir: &Path, 
-        items: &[&str], 
-        tmp_dir: &Path, 
-        tasks: &mut Vec<(PathBuf, PathBuf)>
+        &self,
+        source_dir: &Path,
+        items: &[&str],
+        tmp_dir: &Path,
+        tasks: &mut Vec<(PathBuf, PathBuf)>,
     ) -> Result<(), InitError> {
         for item in items {
             let src_base = source_dir.join(item);
